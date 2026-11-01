@@ -1,0 +1,10 @@
+Options -Indexes
+DirectoryIndex index.php
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^php/ - [F,L]
+    RewriteRule ^public/ - [L]
+    RewriteRule ^(css|js|images|documents)/(.*)$ public/$1/$2 [L]
+    RewriteRule ^.*$ public/index.php [L]
+</IfModule>

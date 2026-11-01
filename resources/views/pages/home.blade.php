@@ -1,0 +1,254 @@
+@extends('layouts.app')
+
+@section('title', 'Pendaftaran Lomba Hari HAM')
+
+@section('styles')
+  <link rel="stylesheet" href="{{ asset('css/home.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/mobile.css') }}">
+@endsection
+
+@section('content')
+
+
+<header class="wrap nav">
+  <a class="brand" href="{{ route('home') }}">
+    <img class="brand-logo" src="{{ asset('images/logo-kemenham.png') }}" alt="Logo Kementerian Hak Asasi Manusia">
+    <span>Kementerian Hak Asasi Manusia</span>
+  </a>
+  <nav class="links" aria-label="Menu utama">
+    <a href="#tentang">Tentang</a>
+  </nav>
+  <div class="actions">
+    <a class="chip" href="{{ $authUser ? route('notifications') : route('login') }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a6 6 0 0 0-6 6v4l-2 4h16l-2-4V8a6 6 0 0 0-6-6zm-2 18a2 2 0 0 0 4 0z"/></svg><span>Notifikasi</span>@if ($unreadCount)<i class="dot" aria-label="Ada notifikasi baru"></i>@endif</a>
+    <a class="chip" href="{{ $authUser ? route('profile') : route('login') }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="8" r="4.5"/><path d="M3 21c0-5 4-7.500 9-7.500s9 2.500 9 7.500z"/></svg><span>{{ $authUser ? 'Akun' : 'Masuk' }}</span></a>
+    @if ($authUser)<form method="post" action="{{ route('logout') }}">@csrf<button class="chip" type="submit">Log-out</button></form>@endif
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="hero">
+    <div class="hero-copy">
+      <div class="hero-kicker" aria-label="Informasi Hari HAM dan lomba">
+        <div class="hero-ticker-track">
+          <p class="hero-ticker-group">
+            <span>Hari HAM Sedunia, 10 Desember 2026</span>
+            <span>Pendaftaran 22 Oktober – 4 November 2026</span>
+            <span>Lomba Buku Cerita HAM &amp; Serial Komik Bergambar</span>
+            <span class="hero-ticker-star" aria-hidden="true">✦</span>
+          </p>
+          <p class="hero-ticker-group" aria-hidden="true">
+            <span>Hari HAM Sedunia, 10 Desember 2026</span>
+            <span>Pendaftaran 22 Oktober – 4 November 2026</span>
+            <span>Lomba Buku Cerita HAM &amp; Serial Komik Bergambar</span>
+            <span class="hero-ticker-star">✦</span>
+          </p>
+        </div>
+      </div>
+      <h1>Lomba Buku Cerita HAM &amp; Serial Komik Bergambar
+        <svg class="star" viewBox="0 0 40 40" fill="none" stroke="#14213d" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 3c1 9 4 14 17 17-13 3-16 8-17 17-1-9-4-14-17-17 13-3 16-8 17-17z"/></svg>
+        <svg class="star star-small" viewBox="0 0 40 40" fill="none" stroke="#000" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 3c1 9 4 14 17 17-13 3-16 8-17 17-1-9-4-14-17-17 13-3 16-8 17-17z"/></svg>
+      </h1>
+      <p class="lead">Ceritakan pentingnya martabat, kesetaraan, dan hak bagi setiap orang. Wujudkan gagasanmu dalam buku cerita atau serial komik dengan tema “Hak Asasi Manusia untuk Semua”.</p>
+    </div>
+
+    <div class="pcell"><div class="phones" id="phones">
+      <div class="phone back">
+        <div class="ph-title"></div>
+        <div class="car" id="car" data-book-image="{{ asset('images/lomba-buku-cerita-ham-portrait.jpg') }}" data-comic-image="{{ asset('images/lomba-serial-komik-ham-portrait.jpg') }}"><div class="track" id="track"></div></div>
+        <p class="slide-caption" id="slide-caption" aria-live="polite"></p>
+        <div class="ctrl">
+          <button type="button" class="arrow" id="prev" aria-label="Foto sebelumnya"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M15 5l-7 7 7 7"/></svg></button>
+          <div class="dots" id="dots"></div>
+          <button type="button" class="arrow" id="next" aria-label="Foto berikutnya"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M9 5l7 7-7 7"/></svg></button>
+        </div>
+      </div>
+      <div class="phone front">
+        <div class="ph-title">Lomba</div>
+        <a class="pitem" href="#buku-cerita" aria-describedby="tip-buku-cerita">
+          <b>Buku Cerita HAM</b><small>Untuk mahasiswa</small>
+          <span class="pitem-tip" id="tip-buku-cerita" role="tooltip">Tema: Hak Asasi Manusia untuk Semua. Buku berisi 10–20 cerita HAM. Batas pengumpulan: 4 November 2026, pukul 23.59 WIB.</span>
+        </a>
+        <a class="pitem" href="#komik" aria-describedby="tip-komik">
+          <b>Serial Komik Bergambar</b><small>Untuk siswa SLTA Sederajat</small>
+          <span class="pitem-tip" id="tip-komik" role="tooltip">Tema: Hak Asasi Manusia untuk Semua. Buat serial komik 5–10 cerita berkelanjutan. Batas pengumpulan: 4 November 2026, pukul 23.59 WIB.</span>
+        </a>
+        <div class="ph-title phone-timeline-title">Tema &amp; Timeline</div>
+        <a class="btn phone-timeline-link" href="#tema-timeline">Lihat selengkapnya <span aria-hidden="true">→</span></a>
+      </div>
+    </div></div>
+  </div>
+
+  <section id="tentang" class="split">
+    <h2 class="bar">Tentang Hari HAM Sedunia</h2>
+    <div class="about">
+      <p>Setiap 10 Desember, dunia memperingati Hari HAM Sedunia untuk mengenang lahirnya Deklarasi Universal Hak Asasi Manusia (1948)—sebuah pijakan penting yang menegaskan bahwa setiap orang berhak hidup setara dan bermartabat.</p>
+      <p>Kini, giliran generasi muda yang bersuara! Mari bagikan cerita dan pandanganmu tentang martabat, kebebasan, serta keadilan di sekitar melalui tulisan dan karya gambar terbaikmu.</p>
+    </div>
+  </section>
+
+  <section class="event-info" id="tema-timeline">
+    <div class="section-heading">
+      <span class="tag">Peringatan Hari HAM Sedunia 2026</span>
+      <h2>Tema dan Timeline Lomba</h2>
+      <p>Kenali tema lomba, pilih sudut cerita yang ingin kamu angkat, dan catat tanggal pentingnya.</p>
+    </div>
+
+    <div class="theme-grid">
+      <article class="theme-main">
+        <span class="theme-label">Tema Utama</span>
+        <h3>Hak Asasi Manusia untuk Semua</h3>
+        <p>Angkat cerita tentang penghormatan terhadap martabat, kesetaraan, dan hak setiap orang. Kamu dapat memilih salah satu subtema berikut atau mengembangkan tema lain yang tetap sejalan dengan nilai-nilai HAM.</p>
+      </article>
+
+      <article class="theme-subtopics">
+        <h3>Subtema</h3>
+        <ol class="subtopic-list">
+          <li><span>01</span><div><h4>Anti Perundungan dan Kekerasan</h4><p>Keberanian membela teman yang mengalami perundungan.</p></div></li>
+          <li><span>02</span><div><h4>Hak Anak dan Hak atas Pendidikan</h4><p>Kesempatan belajar yang setara bagi setiap anak.</p></div></li>
+          <li><span>03</span><div><h4>Kebebasan Berekspresi dan Tanggung Jawab</h4><p>Menyampaikan pendapat dengan santun dan menghormati hak orang lain.</p></div></li>
+          <li><span>04</span><div><h4>Penghormatan terhadap Kelompok Rentan</h4><p>Kepedulian terhadap penyandang disabilitas, anak, lansia, dan kelompok yang membutuhkan perlindungan.</p></div></li>
+          <li><span>05</span><div><h4>Peran Generasi Muda dalam Pemajuan HAM</h4><p>Aksi nyata untuk membangun lingkungan yang aman, inklusif, dan adil.</p></div></li>
+        </ol>
+      </article>
+    </div>
+
+    <div class="timeline">
+      <div class="section-heading">
+        <span class="tag">Catat tanggalnya</span>
+        <h3>Timeline Lomba</h3>
+      </div>
+      <ol class="timeline-list">
+        <li><span class="timeline-step">01</span><div><h4>Pendaftaran dan Pengumpulan Karya</h4><time datetime="2026-10-22">22 Oktober</time> s.d <time datetime="2026-11-04">4 November 2026</time><p>Kirim formulir, karya, dan dokumen persyaratan. Pengumpulan ditutup pukul 23.59 WIB.</p></div></li>
+        <li><span class="timeline-step">02</span><div><h4>Verifikasi Administrasi</h4><time datetime="2026-10-22">22 Oktober</time> s.d <time datetime="2026-11-06">6 November 2026</time><p>Panitia memeriksa kelengkapan dan kesesuaian berkas.</p></div></li>
+        <li><span class="timeline-step">03</span><div><h4>Penilaian Dewan Juri</h4><time datetime="2026-11-09">9 November</time> s.d <time datetime="2026-11-14">14 November 2026</time><p>Juri menilai karya peserta yang lolos verifikasi.</p></div></li>
+        <li><span class="timeline-step">04</span><div><h4>Rekapitulasi dan Penetapan Pemenang</h4><time datetime="2026-11-14">14 November 2026</time><p>Panitia merekap nilai dan menetapkan pemenang.</p></div></li>
+        <li><span class="timeline-step">05</span><div><h4>Pengumuman Pemenang</h4><time datetime="2026-11-19">19 November 2026</time><p>Pengumuman pemenang akan disampaikan melalui kanal Instagram resmi (<a href="https://www.instagram.com/pusbangsdm.ham/" target="_blank" rel="noopener noreferrer">@pusbangsdm.ham</a> dan <a href="https://www.instagram.com/kementerian_ham/" target="_blank" rel="noopener noreferrer">@kementerian_ham</a>).</p></div></li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="lomba">
+    <h2>Pilih Lomba Sesuai Kategori</h2>
+    <div class="cards">
+      <article class="card a" id="buku-cerita">
+        <span class="tag">Untuk Mahasiswa</span>
+        <h3>Lomba Buku Cerita HAM</h3>
+        <div class="card-details">
+          <div>
+            <h4>Gambaran lomba</h4>
+            <p>Buat buku cerita bertema “Hak Asasi Manusia untuk Semua”. Setiap cerita memiliki alur, konflik, penyelesaian, dan pesan HAM yang jelas.</p>
+          </div>
+          <div>
+            <h4>Batas pengumpulan</h4>
+            <p>4 November 2026, pukul 23.59 WIB.</p>
+          </div>
+          <div>
+            <h4>Persyaratan utama</h4>
+            <ul>
+              <li>Mahasiswa aktif di perguruan tinggi wilayah Daerah Khusus Jakarta; individu atau kelompok maksimal 3 orang.</li>
+              <li>10–20 cerita, masing-masing 2.000–3.000 karakter termasuk spasi.</li>
+              <li>Ukuran File Maksimal <strong class="file-size-limit">25 MB</strong>.</li>
+              <li>PDF ukuran A5 dengan sampul dan daftar isi. Karya harus orisinal, belum pernah dipublikasikan, bukan murni hasil AI, dan disertai surat pernyataan keaslian.</li>
+            </ul>
+            <h4 class="contact-heading">Contact Person</h4>
+            <ul>
+              <li class="contact-note">Sdr. Linggar <a href="https://wa.me/6287774533802" target="_blank" rel="noopener noreferrer">(087774533802)</a>.</li>
+          
+            </ul>
+          </div>
+        </div>
+        <div class="foot">
+          <div class="foot-actions">
+            <a class="btn guide" href="{{ asset('documents/pedoman-lomba-ham-2026.pdf') }}" target="_blank" rel="noopener noreferrer">Lihat Pedoman</a>
+            <a class="btn guide" href="{{ asset('documents/Lembar_Keaslian_Lomba_Buku_Cerita_HAM.pdf') }}" download>Unduh Surat Keaslian Karya</a>
+            <a class="btn yellow" href="{{ route('registration.show', 'buku-cerita') }}" data-lomba="buku-cerita">Daftar Lomba Buku Cerita</a>
+          </div>
+          <svg class="art" viewBox="0 0 140 100" aria-hidden="true"><circle cx="100" cy="42" r="34" fill="#facc15" stroke="#14213d" stroke-width="2.500"/><g transform="rotate(-8 61 58)"><rect x="30" y="30" width="62" height="56" rx="6" fill="#1d4ed8" stroke="#14213d" stroke-width="2.500"/><path d="M44 50h32M44 62h22" stroke="#fff" stroke-width="3.500" stroke-linecap="round"/></g></svg>
+        </div>
+      </article>
+      <article class="card b" id="komik">
+        <span class="tag">Untuk Siswa SLTA Sederajat</span>
+        <h3>Lomba Serial Komik Bergambar</h3>
+        <div class="card-details">
+          <div>
+            <h4>Gambaran lomba</h4>
+            <p>Buat serial komik bertema “Hak Asasi Manusia untuk Semua” yang menyampaikan pesan HAM lewat gambar, ekspresi, dialog, dan narasi.</p>
+          </div>
+          <div>
+            <h4>Batas pengumpulan</h4>
+            <p>4 November 2026, pukul 23.59 WIB.</p>
+          </div>
+          <div>
+            <h4>Persyaratan utama</h4>
+            <ul>
+              <li>Pelajar aktif SLTA sederajat di Daerah Khusus Jakarta; individu atau kelompok maksimal 3 orang.</li>
+              <li>5–10 cerita yang berkelanjutan; boleh dibuat secara digital atau digambar lalu dipindai.</li>
+              <li>Ukuran File Maksimal <strong class="file-size-limit">50 MB</strong>.</li>
+              <li>PDF ukuran A5 dengan sampul dan nomor halaman. Karya harus orisinal, bukan murni hasil AI, disertai surat pernyataan keaslian, dan tidak mengandung SARA atau pornografi.</li>
+            </ul>
+            <h4 class="contact-heading">Contact Person</h4>
+            <ul>
+              <li class="contact-note">Sdr. Linggar <a href="https://wa.me/6287774533802" target="_blank" rel="noopener noreferrer">(087774533802)</a>.</li>
+          
+              
+          </div>
+        </div>
+        <div class="foot">
+          <div class="foot-actions">
+            <a class="btn guide" href="{{ asset('documents/pedoman-lomba-ham-2026.pdf') }}" target="_blank" rel="noopener noreferrer">Lihat Pedoman</a>
+            <a class="btn guide" href="{{ asset('documents/Lembar_Keaslian_Lomba_Serial_Komik_Bergambar.pdf') }}" download>Unduh Surat Keaslian Karya</a>
+            <a class="btn yellow" href="{{ route('registration.show', 'komik') }}" data-lomba="komik">Daftar Lomba Komik</a>
+          </div>
+          <svg class="art" viewBox="0 0 140 100" aria-hidden="true"><circle cx="30" cy="30" r="22" fill="#1d4ed8" stroke="#14213d" stroke-width="2.500"/><path d="M46 78l-8 16 26-16z" fill="#facc15" stroke="#14213d" stroke-width="2.500" stroke-linejoin="round"/><rect x="34" y="28" width="92" height="56" rx="14" fill="#facc15" stroke="#14213d" stroke-width="2.500"/><g fill="#14213d"><circle cx="64" cy="56" r="5"/><circle cx="80" cy="56" r="5"/><circle cx="96" cy="56" r="5"/></g></svg>
+        </div>
+      </article>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="f-grid">
+      <div class="f-brand">
+        <a class="brand" href="https://kemenham.go.id" target="_blank" rel="noopener noreferrer">
+          <img class="brand-logo" src="{{ asset('images/logo-kemenham.png') }}" alt="Logo Kementerian Hak Asasi Manusia">
+          Kementerian Hak Asasi Manusia
+        </a>
+        <small>Republik Indonesia</small>
+        <p>Jl. HR. Rasuna Said Kav - 4 - 5 Kuningan<br>Jakarta Selatan Jakarta Indonesia</p>
+        <p>Telepon: <a href="tel:0212526153">0212526153</a><br>Email: <a href="mailto:info@kemenham.go.id">info@kemenham.go.id</a></p>
+      </div>
+      <nav class="f-col" aria-label="Tentang Kami">
+        <h4>Tentang Kami</h4>
+        <a href="https://kemenham.go.id/tentang-kemenham" target="_blank" rel="noopener noreferrer">Profil</a>
+        <a href="https://kemenham.go.id/tugas-fungsi" target="_blank" rel="noopener noreferrer">Tugas dan Fungsi</a>
+        <a href="https://kemenham.go.id/struktur-organisasi-kemenham" target="_blank" rel="noopener noreferrer">Struktur Organisasi</a>
+        <a href="https://kemenham.go.id/kontak-kami" target="_blank" rel="noopener noreferrer">Hubungi Kami</a>
+      </nav>
+      <nav class="f-col" aria-label="Layanan">
+        <h4>Layanan</h4>
+        <a href="https://simasham.kemenham.go.id/" target="_blank" rel="noopener noreferrer">Pengaduan HAM</a>
+        <a href="https://kemenham.go.id/informasi-publik" target="_blank" rel="noopener noreferrer">Informasi Publik</a>
+        <a href="https://hamdans.kemenham.go.id/" target="_blank" rel="noopener noreferrer">Berita</a>
+        <a href="https://kemenham.go.id/informasi-publik/dokumen-dan-panduan-ham" target="_blank" rel="noopener noreferrer">Unduhan</a>
+      </nav>
+      <nav class="f-col" aria-label="Ikuti Kami">
+        <h4>Ikuti Kami</h4>
+        <a href="https://www.instagram.com/kementerian_ham/" target="_blank" rel="noopener noreferrer">Instagram</a>
+        <a href="https://x.com/kementerianham" target="_blank" rel="noopener noreferrer">X (Twitter)</a>
+        <a href="https://www.youtube.com/@kementerian_ham" target="_blank" rel="noopener noreferrer">YouTube</a>
+        <a href="https://www.facebook.com/share/1HLEXivb6G/" target="_blank" rel="noopener noreferrer">Facebook</a>
+      </nav>
+    </div>
+  </div>
+  <div class="f-bottom">© 2026 Kementerian Hak Asasi Manusia Republik Indonesia. Hak cipta dilindungi.</div>
+</footer>
+
+
+
+@endsection
+
+@section('scripts')
+  <script src="{{ asset('js/site-home.js') }}"></script>
+@endsection

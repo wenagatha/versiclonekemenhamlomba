@@ -11,7 +11,7 @@
 <header class="wrap nav">
   <a class="brand" href="{{ route('home') }}"><img class="brand-logo" src="{{ asset('images/logo-kemenham.png') }}" alt=""><span>Kementerian Hak Asasi Manusia</span></a>
   <div class="actions">
-    <a class="chip" href="{{ route('notifications') }}"><span>Notifikasi</span>@if ($unreadCount)<i class="dot" aria-label="{{ $unreadCount }} notifikasi belum dibaca"></i>@endif</a>
+    <a class="chip" href="{{ route('home') }}#notifikasi"><span>Notifikasi</span>@if ($unreadCount)<i class="dot" aria-label="{{ $unreadCount }} notifikasi belum dibaca"></i>@endif</a>
     <a class="chip on" href="{{ route('profile') }}"><span>Akun</span></a>
     <form method="post" action="{{ route('logout') }}">@csrf<button class="chip" type="submit">Log-out</button></form>
   </div>
@@ -58,19 +58,54 @@
           @endif
           @forelse ($registrations as $entry)
             <article class="registration-card">
-              <div class="registration-heading"><h3>{{ $entry->lomba }}</h3><span class="badge">{{ $entry->status }}</span></div>
-              <p>Peserta: {{ $entry->nama_peserta }} · {{ $entry->tipe_tim }}<br>Asal: {{ $entry->asal }}<br>Mendaftar: {{ \Illuminate\Support\Carbon::parse($entry->dibuat_pada)->format('d M Y, H:i') }}</p>
-              @if ($entry->judul)
-                <p>Karya: <b>{{ $entry->judul }}</b> · dikirim {{ \Illuminate\Support\Carbon::parse($entry->dikirim_pada)->format('d M Y, H:i') }}</p>
-              @else
-                <p>Karya belum dikirim.</p>
-              @endif
-              @if ($entry->catatan_admin)<p class="review-note">Catatan panitia: {{ $entry->catatan_admin }}</p>@endif
-              <div class="file-links">
-                @foreach (['pdf' => $entry->file_pdf, 'word' => $entry->file_word, 'kartu' => ($entry->file_kartu ?: $entry->karya_file_kartu), 'pernyataan' => $entry->file_pernyataan] as $kind => $filename)
-                  @if ($filename)<a href="{{ route('files.download', [$entry->id, $kind]) }}" target="_blank" rel="noopener">{{ ucfirst($kind) }}</a>@endif
-                @endforeach
+              <header class="registration-heading">
+                <div>
+                  <span class="registration-eyebrow">Pendaftaran lomba</span>
+                  <h3>{{ $entry->lomba }}</h3>
+                </div>
+                <span class="badge">{{ $entry->status }}</span>
+              </header>
+              <dl class="registration-meta">
+                <div><dt>Peserta</dt><dd>{{ $entry->nama_peserta }} · {{ $entry->tipe_tim }}</dd></div>
+                <div><dt>Asal</dt><dd>{{ $entry->asal }}</dd></div>
+                <div><dt>Tanggal mendaftar</dt><dd>{{ \Illuminate\Support\Carbon::parse($entry->dibuat_pada)->format('d M Y, H:i') }}</dd></div>
+              </dl>
+              <div class="work-summary">
+                <span class="work-label">Karya</span>
+                @if ($entry->judul)
+                  <div class="work-detail">
+                    <b>{{ $entry->judul }}</b>
+                    <time datetime="{{ \Illuminate\Support\Carbon::parse($entry->dikirim_pada)->toIso8601String() }}">Dikirim {{ \Illuminate\Support\Carbon::parse($entry->dikirim_pada)->format('d M Y, H:i') }}</time>
+                  </div>
+                @else
+                  <p class="work-empty">Karya belum dikirim.</p>
+                @endif
               </div>
+              @if ($entry->catatan_admin)
+                <p class="review-note">Catatan panitia: {{ $entry->catatan_admin }}</p>
+              @endif
+              @php
+                $availableUploads = collect([
+                  'pdf' => ['file' => $entry->file_pdf, 'label' => 'PDF Karya'],
+                  'word' => ['file' => $entry->file_word, 'label' => 'Naskah Word'],
+                  'kartu' => ['file' => ($entry->file_kartu ?: $entry->karya_file_kartu), 'label' => 'Kartu Peserta'],
+                  'pernyataan' => ['file' => $entry->file_pernyataan, 'label' => 'Surat Pernyataan'],
+                ])->filter(fn (array $upload): bool => (bool) $upload['file']);
+              @endphp
+              @if ($availableUploads->isNotEmpty())
+                <div class="registration-files">
+                  <h4>Berkas yang diunggah</h4>
+                  <div class="file-links">
+                    @foreach ($availableUploads as $kind => $upload)
+                      <a class="upload-file" href="{{ route('files.download', [$entry->id, $kind]) }}" target="_blank" rel="noopener" aria-label="Lihat {{ $upload['label'] }}">
+                        <span>Lihat {{ $upload['label'] }}</span>
+                        <b>{{ strtoupper(pathinfo($upload['file'], PATHINFO_EXTENSION)) }}</b>
+                      </a>
+                    @endforeach
+                  </div>
+                </div>
+              @endif
+              <div class="registration-actions">
               @if ($entry->tahap === 'terbuka')
                 <a class="btn" href="{{ route('work.show', $entry->kode) }}">{{ $entry->judul ? 'Perbaiki karya' : 'Unggah karya' }} →</a>
               @endif
@@ -80,6 +115,7 @@
                   <button class="del" type="submit">Hapus pendaftaran</button>
                 </form>
               @endif
+              </div>
             </article>
           @empty
             <div class="empty">Kamu belum mendaftar lomba apa pun.

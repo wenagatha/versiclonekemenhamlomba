@@ -11,7 +11,7 @@
 <header class="wrap nav">
   <a class="brand" href="{{ route('home') }}"><img class="brand-logo" src="{{ asset('images/logo-kemenham.png') }}" alt=""><span>Kementerian Hak Asasi Manusia</span></a>
   <div class="actions">
-    <a class="chip" href="{{ route('notifications') }}"><span>Notifikasi{{ $unreadCount ? ' (' . $unreadCount . ')' : '' }}</span></a>
+    <a class="chip" href="{{ route('home') }}#notifikasi"><span>Notifikasi{{ $unreadCount ? ' (' . $unreadCount . ')' : '' }}</span></a>
     <a class="chip" href="{{ route('profile') }}"><span>Akun</span></a>
     <form method="post" action="{{ route('logout') }}">@csrf<button class="chip" type="submit">Log-out</button></form>
   </div>
@@ -64,7 +64,6 @@
       <aside class="box side">
         <h2>Cek sebelum mengirim</h2>
         <ul>@foreach ($competition['rules'] as $rule)<li>{{ $rule }}</li>@endforeach</ul>
-        <a class="btn yellow" href="{{ asset('documents/pedoman-lomba-ham-2026.pdf') }}" target="_blank" rel="noopener">Unduh pedoman lengkap</a>
       </aside>
     </div>
   @endif

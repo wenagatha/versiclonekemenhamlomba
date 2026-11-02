@@ -20,7 +20,6 @@ Route::post('/lomba/{category}/unggah', [CompetitionController::class, 'saveWork
 Route::get('/profil', [CompetitionController::class, 'profile'])->name('profile');
 Route::post('/profil', [CompetitionController::class, 'updateProfile'])->name('profile.update');
 Route::delete('/pendaftaran/{registration}', [CompetitionController::class, 'deleteRegistration'])->name('registration.delete');
-Route::get('/notifikasi', [CompetitionController::class, 'notifications'])->name('notifications');
 Route::post('/notifikasi/baca', [CompetitionController::class, 'markNotificationsRead'])->name('notifications.read');
 Route::get('/berkas/{registration}/{type}', [CompetitionController::class, 'downloadFile'])->whereIn('type', ['pdf', 'word', 'kartu', 'pernyataan'])->name('files.download');
 Route::get('/berkas-unduh-semua', [CompetitionController::class, 'downloadAll'])->name('files.download-all');

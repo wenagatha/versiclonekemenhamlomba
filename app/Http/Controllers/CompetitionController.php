@@ -15,7 +15,12 @@ class CompetitionController extends Controller
 {
     public function home(): View
     {
-        return view('pages.home', $this->sharedData());
+        $viewData = $this->sharedData(50);
+        $registrations = $viewData['authUser']
+            ? $this->registrations((int) $viewData['authUser']->id)
+            : collect();
+
+        return view('pages.home', $viewData + compact('registrations'));
     }
 
     public function registration(string $category): View|RedirectResponse
@@ -291,24 +296,13 @@ class CompetitionController extends Controller
         return redirect()->route('profile', ['tab' => 'upload'])->with('success', 'Pendaftaran berhasil dihapus.');
     }
 
-    public function notifications(): View|RedirectResponse
-    {
-        $user = $this->participant();
-        if (! $user) {
-            return redirect()->route('login');
-        }
-        $notifications = DB::table('notifikasi')->where('pengguna_id', $user->id)->orderByDesc('id')->limit(50)->get();
-
-        return view('pages.notifications', $this->sharedData() + compact('notifications'));
-    }
-
     public function markNotificationsRead(): RedirectResponse
     {
         $user = $this->participant();
         abort_unless($user, 401);
         DB::table('notifikasi')->where('pengguna_id', $user->id)->where('dibaca', 0)->update(['dibaca' => 1]);
 
-        return redirect()->route('notifications')->with('success', 'Semua notifikasi ditandai sudah dibaca.');
+        return redirect()->to(route('home').'#notifikasi')->with('success', 'Semua notifikasi ditandai sudah dibaca.');
     }
 
     public function downloadFile(int $registration, string $type): BinaryFileResponse
@@ -346,7 +340,7 @@ class CompetitionController extends Controller
         $rows = DB::table('pendaftaran as p')
             ->leftJoin('karya as k', 'k.pendaftaran_id', '=', 'p.id')
             ->where('p.pengguna_id', $user->id)
-            ->select('p.id', 'p.nama_peserta', 'p.file_kartu', 'k.file_pdf', 'k.file_word', 'k.file_pernyataan')
+            ->select('p.id', 'p.file_kartu', 'k.file_pdf', 'k.file_word', 'k.file_kartu as karya_file_kartu', 'k.file_pernyataan')
             ->get();
         $tmp = tempnam(sys_get_temp_dir(), 'kemenham-');
         $zip = new \ZipArchive;
@@ -356,8 +350,12 @@ class CompetitionController extends Controller
         }
 
         foreach ($rows as $row) {
-            foreach (['file_pdf' => 'karya', 'file_word' => 'naskah', 'file_pernyataan' => 'pernyataan', 'file_kartu' => 'kartu'] as $column => $label) {
-                $name = $row->{$column} ?? '';
+            foreach ([
+                'karya' => $row->file_pdf,
+                'naskah' => $row->file_word,
+                'pernyataan' => $row->file_pernyataan,
+                'kartu' => $row->file_kartu ?: $row->karya_file_kartu,
+            ] as $label => $name) {
                 $path = $name ? $this->uploadPath($name) : '';
                 if ($path && is_file($path)) {
                     $zip->addFile($path, $row->id.'-'.$label.'.'.pathinfo($name, PATHINFO_EXTENSION));
@@ -376,11 +374,11 @@ class CompetitionController extends Controller
         return $id ? DB::table('pengguna')->where('id', $id)->where('role', 'peserta')->first() : null;
     }
 
-    private function sharedData(): array
+    private function sharedData(int $notificationLimit = 10): array
     {
         $user = $this->participant();
         $notifications = $user
-            ? DB::table('notifikasi')->where('pengguna_id', $user->id)->orderByDesc('id')->limit(10)->get()
+            ? DB::table('notifikasi')->where('pengguna_id', $user->id)->orderByDesc('id')->limit($notificationLimit)->get()
             : collect();
 
         return [

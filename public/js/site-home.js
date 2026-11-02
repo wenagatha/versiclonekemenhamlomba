@@ -1,4 +1,29 @@
 (() => {
+  const notificationDialog = document.getElementById('notifikasi');
+  const notificationTrigger = document.getElementById('notifications-trigger');
+  const notificationClose = notificationDialog?.querySelector('.notification-close');
+
+  if (notificationDialog && notificationTrigger) {
+    const openNotifications = () => {
+      if (!notificationDialog.open) notificationDialog.showModal();
+      notificationTrigger.setAttribute('aria-expanded', 'true');
+    };
+    const closeNotifications = () => {
+      notificationDialog.close();
+      notificationTrigger.setAttribute('aria-expanded', 'false');
+      notificationTrigger.focus();
+    };
+
+    notificationTrigger.addEventListener('click', openNotifications);
+    notificationClose?.addEventListener('click', closeNotifications);
+    notificationDialog.addEventListener('close', () => notificationTrigger.setAttribute('aria-expanded', 'false'));
+    notificationDialog.addEventListener('click', (event) => {
+      if (event.target === notificationDialog) closeNotifications();
+    });
+
+    if (window.location.hash === '#notifikasi') openNotifications();
+  }
+
   const car = document.getElementById('car');
   if (!car) return;
   const track = document.getElementById('track');

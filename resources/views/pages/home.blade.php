@@ -19,11 +19,41 @@
     <a href="#tentang">Tentang</a>
   </nav>
   <div class="actions">
-    <a class="chip" href="{{ $authUser ? route('notifications') : route('login') }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a6 6 0 0 0-6 6v4l-2 4h16l-2-4V8a6 6 0 0 0-6-6zm-2 18a2 2 0 0 0 4 0z"/></svg><span>Notifikasi</span>@if ($unreadCount)<i class="dot" aria-label="Ada notifikasi baru"></i>@endif</a>
+    @if ($authUser)
+      <button class="chip notification-trigger" id="notifications-trigger" type="button" aria-haspopup="dialog" aria-controls="notifikasi" aria-expanded="false"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a6 6 0 0 0-6 6v4l-2 4h16l-2-4V8a6 6 0 0 0-6-6zm-2 18a2 2 0 0 0 4 0z"/></svg><span>Notifikasi</span>@if ($unreadCount)<i class="dot" aria-label="Ada notifikasi baru"></i>@endif</button>
+    @else
+      <a class="chip" href="{{ route('login') }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a6 6 0 0 0-6 6v4l-2 4h16l-2-4V8a6 6 0 0 0-6-6zm-2 18a2 2 0 0 0 4 0z"/></svg><span>Notifikasi</span></a>
+    @endif
     <a class="chip" href="{{ $authUser ? route('profile') : route('login') }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="8" r="4.5"/><path d="M3 21c0-5 4-7.500 9-7.500s9 2.500 9 7.500z"/></svg><span>{{ $authUser ? 'Akun' : 'Masuk' }}</span></a>
     @if ($authUser)<form method="post" action="{{ route('logout') }}">@csrf<button class="chip" type="submit">Log-out</button></form>@endif
   </div>
 </header>
+
+@if ($authUser)
+  <dialog class="notification-dialog" id="notifikasi" aria-labelledby="notifications-title" aria-describedby="notifications-description">
+    <div class="notification-heading">
+      <div>
+        <span class="tag">Pembaruan akun</span>
+        <h2 id="notifications-title">Notifikasi</h2>
+        <p id="notifications-description">Pembaruan pendaftaran dan karya lombamu.</p>
+      </div>
+      <button class="notification-close" type="button" aria-label="Tutup notifikasi">&times;</button>
+    </div>
+    @if ($notifications->contains('dibaca', 0))
+      <form method="post" action="{{ route('notifications.read') }}" class="notification-actions">@csrf<button class="btn yellow" type="submit">Tandai semua dibaca</button></form>
+    @endif
+    <div class="notification-list">
+      @forelse ($notifications as $notification)
+        <article class="notification-item {{ !$notification->dibaca ? 'unread' : '' }}">
+          <p>{{ $notification->pesan }}</p>
+          <time datetime="{{ \Illuminate\Support\Carbon::parse($notification->dibuat_pada)->toIso8601String() }}">{{ \Illuminate\Support\Carbon::parse($notification->dibuat_pada)->format('d M Y, H:i') }}</time>
+        </article>
+      @empty
+        <p class="notification-empty">Belum ada notifikasi.</p>
+      @endforelse
+    </div>
+  </dialog>
+@endif
 
 <main class="wrap">
   <div class="hero">
@@ -161,7 +191,18 @@
           <div class="foot-actions">
             <a class="btn guide" href="{{ asset('documents/pedoman-lomba-ham-2026.pdf') }}" target="_blank" rel="noopener noreferrer">Lihat Pedoman</a>
             <a class="btn guide" href="{{ asset('documents/Lembar_Keaslian_Lomba_Buku_Cerita_HAM.pdf') }}" download>Unduh Surat Keaslian Karya</a>
-            <a class="btn yellow" href="{{ route('registration.show', 'buku-cerita') }}" data-lomba="buku-cerita">Daftar Lomba Buku Cerita</a>
+            @php($bookRegistration = $registrations->firstWhere('kode', 'buku-cerita'))
+            @if ($bookRegistration)
+              @if ($bookRegistration->judul)
+                <a class="btn yellow" href="{{ route('profile', ['tab' => 'upload']) }}">Lihat hasil upload</a>
+              @else
+                <a class="btn yellow" href="{{ route('registration.show', 'buku-cerita') }}" data-lomba="buku-cerita">Lanjutkan pendaftaran</a>
+              @endif
+            @elseif ($authUser && $registrations->isNotEmpty())
+              <a class="btn yellow" href="{{ route('profile', ['tab' => 'upload']) }}">Lihat lomba yang dipilih</a>
+            @else
+              <a class="btn yellow" href="{{ route('registration.show', 'buku-cerita') }}" data-lomba="buku-cerita">Daftar Lomba Buku Cerita</a>
+            @endif
           </div>
           <svg class="art" viewBox="0 0 140 100" aria-hidden="true"><circle cx="100" cy="42" r="34" fill="#facc15" stroke="#14213d" stroke-width="2.500"/><g transform="rotate(-8 61 58)"><rect x="30" y="30" width="62" height="56" rx="6" fill="#1d4ed8" stroke="#14213d" stroke-width="2.500"/><path d="M44 50h32M44 62h22" stroke="#fff" stroke-width="3.500" stroke-linecap="round"/></g></svg>
         </div>
@@ -197,7 +238,18 @@
           <div class="foot-actions">
             <a class="btn guide" href="{{ asset('documents/pedoman-lomba-ham-2026.pdf') }}" target="_blank" rel="noopener noreferrer">Lihat Pedoman</a>
             <a class="btn guide" href="{{ asset('documents/Lembar_Keaslian_Lomba_Serial_Komik_Bergambar.pdf') }}" download>Unduh Surat Keaslian Karya</a>
-            <a class="btn yellow" href="{{ route('registration.show', 'komik') }}" data-lomba="komik">Daftar Lomba Komik</a>
+            @php($comicRegistration = $registrations->firstWhere('kode', 'komik'))
+            @if ($comicRegistration)
+              @if ($comicRegistration->judul)
+                <a class="btn yellow" href="{{ route('profile', ['tab' => 'upload']) }}">Lihat hasil upload</a>
+              @else
+                <a class="btn yellow" href="{{ route('registration.show', 'komik') }}" data-lomba="komik">Lanjutkan pendaftaran</a>
+              @endif
+            @elseif ($authUser && $registrations->isNotEmpty())
+              <a class="btn yellow" href="{{ route('profile', ['tab' => 'upload']) }}">Lihat lomba yang dipilih</a>
+            @else
+              <a class="btn yellow" href="{{ route('registration.show', 'komik') }}" data-lomba="komik">Daftar Lomba Komik</a>
+            @endif
           </div>
           <svg class="art" viewBox="0 0 140 100" aria-hidden="true"><circle cx="30" cy="30" r="22" fill="#1d4ed8" stroke="#14213d" stroke-width="2.500"/><path d="M46 78l-8 16 26-16z" fill="#facc15" stroke="#14213d" stroke-width="2.500" stroke-linejoin="round"/><rect x="34" y="28" width="92" height="56" rx="14" fill="#facc15" stroke="#14213d" stroke-width="2.500"/><g fill="#14213d"><circle cx="64" cy="56" r="5"/><circle cx="80" cy="56" r="5"/><circle cx="96" cy="56" r="5"/></g></svg>
         </div>
